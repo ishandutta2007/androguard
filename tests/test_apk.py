@@ -918,9 +918,12 @@ class APKTest(unittest.TestCase):
         )
         from androguard.core.api_specific_resources import load_permissions
 
+        import androguard
+
+        core_dir = os.path.dirname(os.path.abspath(androguard.__file__))
         aosp_permissions = os.path.join(
-            test_dir,
-            '../androguard/core/api_specific_resources/aosp_permissions',
+            core_dir,
+            'core/api_specific_resources/aosp_permissions',
         )
         levels = filter(
             lambda x: re.match(r'^permissions_\d+\.json$', x),
