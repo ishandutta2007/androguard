@@ -48,12 +48,12 @@ class DecompilerTest(unittest.TestCase):
             # if methods are in the class
             if len(c.get_methods()) == 0:
                 # But we test on all classes that have no methods.
-                yield dvclass, c, dx
+                dvclass(c, dx)
                 continue
 
-            yield dvmethod, c, dx, False
+            dvmethod(c, dx, False)
             # Disable tests for doAST=True for now...
-            yield dvmethod, c, dx, True
+            dvmethod(c, dx, True)
 
 
 def dvmethod(c, dx, doAST=False):
