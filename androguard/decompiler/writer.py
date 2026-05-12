@@ -179,9 +179,17 @@ class Writer:
             self.write_ext(
                 ('NAME_METHOD_PROTOTYPE', '%s' % self.method.name, self.method)
             )
+        # `lparams` is the list of Dalvik register indices a method's
+        # parameters live in.  It is populated in DvMethod.__init__ only
+        # when the method has a code item; for `native` / `abstract`
+        # methods the list stays empty even though `params_type` was
+        # correctly parsed from the descriptor.  Fall back to a synthetic
+        # 0..N-1 range so the prototype line still gets its real arguments.
         params = self.method.lparams
         if 'static' not in access:
             params = params[1:]
+        if not params and self.method.params_type:
+            params = list(range(len(self.method.params_type)))
         proto = ''
         self.write_ext(('PARENTHESIS_START', '('))
         if self.method.params_type:
