@@ -10,6 +10,7 @@ Do you think your phone has been pwned ? please check [IsMyPhonePwned](https://g
 
 New tool: Goauld [Dynamic injection tool for Linux/Android ](https://github.com/androguard/goauld)
 
+See the new version of Androguard: https://github.com/androguard/androguard/tree/ng
 
 ## Installation
 Quick installation:
