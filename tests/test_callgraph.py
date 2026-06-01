@@ -80,7 +80,7 @@ class TestCallgraph(unittest.TestCase):
     def testCallgraphFilterDescriptor(self):
         """test callgraph with descriptor filter parameter"""
         callgraph = self.dx.get_call_graph(
-            descriptor='\(LTestDefaultPackage;\sI\sI\sLTestDefaultPackage\$TestInnerClass;\)V'
+            descriptor=r'\(LTestDefaultPackage;\sI\sI\sLTestDefaultPackage\$TestInnerClass;\)V'
         )
 
         total_nodes, total_external_nodes, total_internal_nodes = (
