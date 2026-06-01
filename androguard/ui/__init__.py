@@ -20,7 +20,7 @@ from prompt_toolkit.layout import (
 )
 from prompt_toolkit.styles import Style
 
-from androguard.pentest import Message
+from androguard.message import Message
 from androguard.ui.data_types import DisplayTransaction
 from androguard.ui.filter import Filter
 from androguard.ui.selection import SelectionViewList

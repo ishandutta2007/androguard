@@ -1,6 +1,6 @@
 import datetime
 
-from androguard.pentest import Message, MessageEvent, MessageSystem
+from androguard.message import Message, MessageEvent, MessageSystem
 
 
 class DisplayTransaction:
