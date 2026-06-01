@@ -11,4 +11,4 @@ loguru
 apkInspector>=1.2.1
 networkx
 pyyaml
-cryptography
+cryptography>=46.0.6
