@@ -15,6 +15,8 @@ Chain of reasoning: **finding → implication → verification → report**.
 
 ## Primary toolkit
 
+Prefer **MCP tools** when the `androguard` MCP server is connected (`open_apk`, `decompile_method`, …). Otherwise use the CLI / `Application` API.
+
 | Task | Command / API |
 |------|----------------|
 | Summary | `androguard -i $APK` |
@@ -28,6 +30,7 @@ Chain of reasoning: **finding → implication → verification → report**.
 | Vulns | `--scan-vulns` |
 | Emulate | `--emulate 'pkg.Class#method'` |
 | Decode project | `--decode-project` (`[patch]`) |
+| MCP | see `docs/mcp-server.md` |
 
 Python:
 

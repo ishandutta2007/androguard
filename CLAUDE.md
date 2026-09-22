@@ -101,6 +101,7 @@ Decompiler quality work lives primarily in the sibling `dex-decompiler` repo (`c
 
 - Agent: `/agent androguard-analyst`
 - Skills: `/analyze-apk`, `/decompile-apk`, `/find-refs`, `/scan-vulns`
+- MCP: if the `androguard` MCP server is connected, prefer its tools (`open_apk`, `decompile_method`, …) over shelling out to the CLI. See `docs/mcp-server.md`.
 
 ## Rules
 

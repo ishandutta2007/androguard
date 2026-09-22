@@ -15,7 +15,19 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/androguard)
 ![Static Badge](https://img.shields.io/badge/Documentation-InProgress-red)
 
-Do you think your phone has been pwned ? please check [IsMyPhonePwned](https://github.com/IsMyPhonePwned)
+**Androguard 5** is a Python toolkit for Android reverse engineering: open an APK, inspect the manifest and DEX, disassemble or decompile code, hunt references and vulnerabilities, and optionally patch or analyze native ARM — from the CLI, a high-level `Application` API, Claude Code skills, or an MCP server for LLM hosts.
+
+### Main features
+
+- **APK / DEX analysis** — package metadata, permissions, classes, methods, strings (`apkparser-ag`, `dexparser-ag`, `axml`)
+- **Dalvik disassembly & CFG** — method-level bytecode via `androguard[disasm]`
+- **Java decompilation** — methods, classes, or whole packages via `androguard[decompile]`
+- **Cross-refs & vulns** — `findrefs`, vulnerability scanners, method emulation
+- **Native ARM64** — disassemble / decompile `.so` code via `androguard[arm]`
+- **APK patch** — decode / rebuild project trees via `androguard[patch]`
+- **LLM integration** — Claude Code agent & skills, plus an **MCP server** (`androguard-mcp`) for Claude Code, Cursor, and other MCP clients
+
+Do you think your phone has been pwned? Please check [IsMyPhonePwned](https://github.com/IsMyPhonePwned).
 
 
 ## Installation
@@ -86,6 +98,36 @@ claude /agent androguard-analyst
 claude /analyze-apk path/to/app.apk
 claude /decompile-apk path/to/app.apk com.example.app
 ```
+
+## MCP server
+
+Androguard can run as an [MCP](https://modelcontextprotocol.io/) server so LLM hosts (Claude Code, Cursor, …) call typed analysis tools instead of shelling out to the CLI.
+
+```bash
+pip install -e '.[mcp,decompile]'   # add [disasm] for disassembly tools
+androguard-mcp                     # or: python -m androguard.mcp
+```
+
+Example client config:
+
+```json
+{
+  "mcpServers": {
+    "androguard": {
+      "command": "androguard-mcp",
+      "env": {
+        "ANDROGUARD_MCP_ROOTS": "/path/to/androguard"
+      }
+    }
+  }
+}
+```
+
+Typical flow: `open_apk` → `session_id` → `list_classes` / `find_refs` / `decompile_method` / `scan_vulns`.
+
+On launch the server prints a stderr banner (versions, tools, path roots, extras). Use `--log-tools` to log each tool call, and `--log-level DEBUG` for more detail.
+
+Full tool list, env vars, and security notes: [`docs/mcp-server.md`](docs/mcp-server.md). Design background: [`docs/mcp-server-plan.md`](docs/mcp-server-plan.md).
 
 ## Quick start
 

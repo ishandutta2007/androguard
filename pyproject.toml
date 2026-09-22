@@ -47,12 +47,16 @@ arm = [
 patch = [
     "apk-patch @ git+https://github.com/androguard/apk-patch.git#subdirectory=crates/apk-patch-py",
 ]
+mcp = [
+    "mcp>=1.0",
+]
 full = [
-    "androguard[disasm,decompile,arm,patch]",
+    "androguard[disasm,decompile,arm,patch,mcp]",
 ]
 
 [project.scripts]
 androguard = "androguard.cli.main:app"
+androguard-mcp = "androguard.mcp.server:main"
 
 [build-system]
 requires = ["setuptools>=68", "setuptools_scm>=8.0"]

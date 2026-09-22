@@ -29,6 +29,7 @@ HAS_ARM_DISASM = has_module("arm_disassembler")
 HAS_ARM_DECOMP = has_module("arm_decompiler")
 HAS_PATCH = has_module("apk_patch")
 HAS_ARM = HAS_ARM_DISASM and HAS_ARM_DECOMP
+HAS_MCP = has_module("mcp")
 
 
 def file_exists(path: Path | str) -> bool:
