@@ -1,5 +1,5 @@
 
-<p align="center"><img width="120" src="./.github/logo.png"></p>
+<p align="center"><img width="200" src="./.github/logo.png" alt="Androguard"></p>
 <h2 align="center">Androguard</h2>
 
 # Androguard: Reverse engineering and pentesting for Android applications
