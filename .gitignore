@@ -25,3 +25,12 @@ ak_androguard.egg-info
 *.db
 *.db-*
 *DS_Store*
+
+# Claude Code / analysis workspace artifacts
+.claude/settings.local.json
+workspace/samples/
+workspace/output/
+workspace/reports/
+*.apk
+!tests/**/*.apk
+

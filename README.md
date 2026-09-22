@@ -70,6 +70,23 @@ python -m examples.run_all
 
 See [`examples/README.md`](examples/README.md).
 
+## Claude Code
+
+This repo ships Claude Code project support (similar in spirit to [areclaw](https://github.com/TheQmaks/areclaw), but driven by Androguard itself):
+
+| Path | Role |
+|------|------|
+| [`CLAUDE.md`](CLAUDE.md) | Project instructions for the agent |
+| [`.claude/agents/androguard-analyst.md`](.claude/agents/androguard-analyst.md) | Analyst agent |
+| [`.claude/skills/`](.claude/skills/) | `/analyze-apk`, `/decompile-apk`, `/find-refs`, `/scan-vulns` |
+| [`workspace/`](workspace/) | Samples, decompiled output, reports |
+
+```bash
+claude /agent androguard-analyst
+claude /analyze-apk path/to/app.apk
+claude /decompile-apk path/to/app.apk com.example.app
+```
+
 ## Quick start
 
 ### Command line

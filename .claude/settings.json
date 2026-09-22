@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(androguard *)",
+      "Bash(python *)",
+      "Bash(pytest *)",
+      "Bash(pip *)",
+      "Bash(unzip *)",
+      "Bash(rg *)",
+      "Bash(grep *)"
+    ]
+  }
+}
