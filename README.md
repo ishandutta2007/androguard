@@ -37,17 +37,6 @@ pip install androguard
 pip install 'androguard[full]'
 ```
 
-**DEX parsing** ([dex-parser](https://github.com/androguard/dex-parser)) ships as a native extension (`dexparser-ag`). For development from source you need Rust and [maturin](https://www.maturin.rs/):
-
-```bash
-git clone https://github.com/androguard/dex-parser.git
-cd dex-parser
-python3 -m venv .venv && source .venv/bin/activate
-pip install maturin
-maturin develop --manifest-path dexparser-py/Cargo.toml
-pip install androguard
-```
-
 > [!IMPORTANT]
 > Versions >= 4.0.0 are new releases after a long time, where the project has substantial differences from the previous stable version 3.3.5 from 2019. This means that certain functionalities have been removed. If you notice an issue with your project using the latest version, please open up an [issue](https://github.com/androguard/androguard/issues).
 
@@ -325,14 +314,6 @@ print(app.getclass("tests.androguard.TestActivity")[:500])
 print(app.findrefs("type", "Landroid/app/Activity;"))
 print(app.scan_vulns()[:3])
 print(app.emulate("tests.androguard.TestActivity", "onCreate"))
-```
-
-Build from source (requires Rust + maturin):
-
-```bash
-git clone https://github.com/androguard/dex-decompiler.git
-cd dex-decompiler/dex-decompiler-py
-PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 maturin develop --release
 ```
 
 ### ARM64 (`arm_disassembler` / `arm_decompiler`, optional)
