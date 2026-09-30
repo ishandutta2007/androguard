@@ -1,0 +1,657 @@
+{
+  "_comment": "Expected Androguard scan_vulns categories for OWASP MASTG Android demos. expect_any = pass if any listed category hits MastgTest*. forbid = fail if listed (negative demos). empty expect_any = documented coverage gap (status=gap, not fail).",
+  "demos": {
+    "MASTG-DEMO-0001": {
+      "expect_any": [
+        "external_storage_write",
+        "hardcoded_secrets_review",
+        "logging_pii"
+      ],
+      "notes": "Writes secrets via getExternalFilesDir / MediaStore"
+    },
+    "MASTG-DEMO-0002": {
+      "expect_any": [
+        "logging_pii",
+        "hardcoded_secrets_review"
+      ],
+      "notes": "Frida traces external storage; static incidental logging/secrets (partial lesson)"
+    },
+    "MASTG-DEMO-0003": {
+      "expect_any": [
+        "external_storage_write",
+        "dangerous_permission"
+      ],
+      "notes": "getExternalStorageDirectory + MANAGE_EXTERNAL_STORAGE"
+    },
+    "MASTG-DEMO-0004": {
+      "expect_any": [
+        "external_storage_write"
+      ],
+      "notes": "getExternalFilesDir scoped external write"
+    },
+    "MASTG-DEMO-0005": {
+      "expect_any": [
+        "external_storage_write",
+        "logging_pii"
+      ],
+      "notes": "MediaStore EXTERNAL insert of secret file"
+    },
+    "MASTG-DEMO-0006": {
+      "expect_any": [
+        "logging_pii",
+        "insecure_logging"
+      ],
+      "notes": "Logging secrets/PII via Log.*"
+    },
+    "MASTG-DEMO-0007": {
+      "expect_any": [
+        "insecure_random"
+      ],
+      "notes": "java.util.Random / Math.random for tokens/passwords"
+    },
+    "MASTG-DEMO-0008": {
+      "expect_any": [
+        "non_random_source"
+      ],
+      "notes": "Date/Calendar used as token entropy"
+    },
+    "MASTG-DEMO-0009": {
+      "expect_any": [
+        "network_pii"
+      ],
+      "notes": "PII posted via HttpURLConnection"
+    },
+    "MASTG-DEMO-0010": {
+      "expect_any": [
+        "hardcoded_secrets_review"
+      ],
+      "notes": "Secret written to internal filesDir"
+    },
+    "MASTG-DEMO-0012": {
+      "expect_any": [
+        "insufficient_key_length",
+        "weak_crypto"
+      ],
+      "notes": "RSA 1024 + AES 128 key generation (insufficient_key_length)"
+    },
+    "MASTG-DEMO-0017": {
+      "expect_any": [
+        "hardcoded_secrets_review",
+        "weak_crypto"
+      ],
+      "notes": "Hardcoded AES key in SecretKeySpec"
+    },
+    "MASTG-DEMO-0020": {
+      "expect_any": [
+        "allow_backup",
+        "hardcoded_secrets_review"
+      ],
+      "notes": "allowBackup + secrets in filesDir; backup_rules exclude only some files"
+    },
+    "MASTG-DEMO-0022": {
+      "expect_any": [
+        "weak_crypto"
+      ],
+      "notes": "Broken symmetric algorithms (DES/3DES/RC4)"
+    },
+    "MASTG-DEMO-0023": {
+      "expect_any": [
+        "weak_crypto"
+      ],
+      "notes": "Broken encryption modes (AES/ECB)"
+    },
+    "MASTG-DEMO-0025": {
+      "expect_any": [
+        "sdk_int_check"
+      ],
+      "notes": "Build.VERSION.SDK_INT inventory"
+    },
+    "MASTG-DEMO-0027": {
+      "expect_any": [
+        "device_lock_api_check"
+      ],
+      "notes": "Frida observes isDeviceSecure/canAuthenticate; statically inventoried"
+    },
+    "MASTG-DEMO-0028": {
+      "expect_any": [
+        "device_lock_api_check"
+      ],
+      "notes": "KeyguardManager.isDeviceSecure / BiometricManager.canAuthenticate (semgrep sibling of 0027)"
+    },
+    "MASTG-DEMO-0029": {
+      "expect_any": [
+        "webview_file_access",
+        "webview_unsafe"
+      ],
+      "notes": "WebView content access (semgrep sibling of 0030)"
+    },
+    "MASTG-DEMO-0030": {
+      "expect_any": [
+        "webview_file_access",
+        "webview_unsafe",
+        "webview_file_access"
+      ],
+      "notes": "WebView content/file access \u2014 Frida exploit path"
+    },
+    "MASTG-DEMO-0031": {
+      "expect_any": [
+        "webview_file_access",
+        "webview_unsafe"
+      ],
+      "notes": "WebView local file access \u2014 Frida exploit path"
+    },
+    "MASTG-DEMO-0032": {
+      "expect_any": [
+        "webview_file_access",
+        "webview_unsafe"
+      ],
+      "notes": "WebView local file access (semgrep sibling of 0031)"
+    },
+    "MASTG-DEMO-0033": {
+      "expect_any": [
+        "dangerous_permission"
+      ],
+      "notes": "Dangerous permissions in manifest (contacts/storage)"
+    },
+    "MASTG-DEMO-0034": {
+      "expect_any": [
+        "allow_backup"
+      ],
+      "notes": "Backup/restore via DEMO-0020 sources (allowBackup + fullBackupContent)",
+      "source_from": [
+        "MASTG-DEMO-0020"
+      ]
+    },
+    "MASTG-DEMO-0035": {
+      "expect_any": [
+        "allow_backup"
+      ],
+      "notes": "backup_rules + adb backup via DEMO-0020 sources",
+      "source_from": [
+        "MASTG-DEMO-0020"
+      ]
+    },
+    "MASTG-DEMO-0037": {
+      "expect_any": [
+        "strict_mode_policy"
+      ],
+      "notes": "StrictMode + leaked SQLite cursor sample"
+    },
+    "MASTG-DEMO-0038": {
+      "expect_any": [
+        "strict_mode_policy"
+      ],
+      "notes": "Frida StrictMode demo; shares DEMO-0037 sources",
+      "source_from": [
+        "MASTG-DEMO-0037"
+      ]
+    },
+    "MASTG-DEMO-0039": {
+      "expect_any": [
+        "strict_mode_policy"
+      ],
+      "notes": "StrictMode PenaltyLog via DEMO-0037 sources",
+      "source_from": [
+        "MASTG-DEMO-0037"
+      ]
+    },
+    "MASTG-DEMO-0040": {
+      "expect_any": [
+        "manifest_debuggable"
+      ],
+      "notes": "android:debuggable=true"
+    },
+    "MASTG-DEMO-0048": {
+      "expect_any": [
+        "ssl_socket_no_hostname"
+      ],
+      "notes": "SSLSocket to wrong host without HostnameVerifier"
+    },
+    "MASTG-DEMO-0049": {
+      "forbid": [
+        "ssl_trust_all"
+      ],
+      "notes": "Negative: HostnameVerifier blocks wrong host"
+    },
+    "MASTG-DEMO-0050": {
+      "expect_any": [],
+      "notes": "GAP: other demo with no injectable sources (Identifying Insecure Dependencies in Android Studio)"
+    },
+    "MASTG-DEMO-0051": {
+      "expect_any": [],
+      "notes": "GAP: other demo with no injectable sources (Identifying Insecure Dependencies through SBOM Creation)"
+    },
+    "MASTG-DEMO-0054": {
+      "expect_any": [
+        "ssl_trust_all"
+      ],
+      "notes": "TrustManager that does not validate chains"
+    },
+    "MASTG-DEMO-0055": {
+      "expect_any": [
+        "ssl_trust_all"
+      ],
+      "notes": "HostnameVerifier that allows any hostname"
+    },
+    "MASTG-DEMO-0056": {
+      "expect_any": [
+        "ssl_trust_all"
+      ],
+      "notes": "WebView onReceivedSslError \u2192 SslErrorHandler.proceed"
+    },
+    "MASTG-DEMO-0057": {
+      "expect_any": [
+        "network_security_config_user_ca"
+      ],
+      "notes": "networkSecurityConfig trusts user CAs"
+    },
+    "MASTG-DEMO-0058": {
+      "expect_any": [
+        "weak_crypto"
+      ],
+      "notes": "AES/ECB KeyGenParameterSpec; Frida for observation"
+    },
+    "MASTG-DEMO-0059": {
+      "expect_any": [
+        "prefs_plaintext_secret"
+      ],
+      "notes": "Plaintext secrets in SharedPreferences (Frida traces putString)"
+    },
+    "MASTG-DEMO-0060": {
+      "expect_any": [],
+      "forbid": [
+        "prefs_plaintext_secret"
+      ],
+      "notes": "Negative/secure EncryptedSharedPreferences counterpart"
+    },
+    "MASTG-DEMO-0061": {
+      "expect_any": [
+        "flag_secure"
+      ],
+      "notes": "Window FLAG_SECURE inventory"
+    },
+    "MASTG-DEMO-0062": {
+      "expect_any": [],
+      "notes": "GAP: docs demo with no injectable sources (Enabling Screenshots in Recents via setRecentsScreenshotEnabled with semgrep)"
+    },
+    "MASTG-DEMO-0063": {
+      "expect_any": [],
+      "notes": "GAP: docs demo with no injectable sources (Incorrectly Preventing Screenshots with SecureFlagPolicy in Compose Dialogs with semgrep)"
+    },
+    "MASTG-DEMO-0064": {
+      "expect_any": [
+        "ui_password_cache"
+      ],
+      "notes": "Password/PIN EditText without proper inputType"
+    },
+    "MASTG-DEMO-0068": {
+      "expect_any": [],
+      "notes": "GAP: docs demo with no injectable sources (Sensitive Data in Unencrypted SQLite)"
+    },
+    "MASTG-DEMO-0069": {
+      "expect_any": [],
+      "notes": "GAP: docs demo with no injectable sources (Sensitive Data Stored Unencrypted via DataStore)"
+    },
+    "MASTG-DEMO-0070": {
+      "expect_any": [],
+      "notes": "GAP: docs demo with no injectable sources (Sensitive Data Stored Unencrypted via Room Database)"
+    },
+    "MASTG-DEMO-0071": {
+      "expect_any": [
+        "keystore_multipurpose"
+      ],
+      "notes": "RSA key PURPOSE_SIGN|VERIFY|ENCRYPT|DECRYPT"
+    },
+    "MASTG-DEMO-0072": {
+      "expect_any": [
+        "keystore_multipurpose"
+      ],
+      "notes": "Frida runtime of DEMO-0071 multipurpose key",
+      "source_from": [
+        "MASTG-DEMO-0071"
+      ]
+    },
+    "MASTG-DEMO-0075": {
+      "expect_any": [
+        "explicit_security_provider"
+      ],
+      "notes": "Security.addProvider(CustomProvider)"
+    },
+    "MASTG-DEMO-0078": {
+      "expect_any": [
+        "notification_sensitive"
+      ],
+      "notes": "PII in Notification content"
+    },
+    "MASTG-DEMO-0079": {
+      "expect_any": [
+        "compose_password_visible"
+      ],
+      "notes": "SecureTextField with TextObfuscationMode.Visible"
+    },
+    "MASTG-DEMO-0081": {
+      "expect_any": [
+        "tracker_fingerprint_api"
+      ],
+      "notes": "Firebase Analytics; Frida for event payloads"
+    },
+    "MASTG-DEMO-0082": {
+      "expect_any": [
+        "webview_javascript_interface"
+      ],
+      "notes": "WebStorage demo; JS bridge is related static surface"
+    },
+    "MASTG-DEMO-0087": {
+      "expect_any": [
+        "rce_dynamic_loading",
+        "rce_process_exec"
+      ],
+      "notes": "Root detection via Runtime.exec / which su / package checks"
+    },
+    "MASTG-DEMO-0088": {
+      "expect_any": [
+        "rce_dynamic_loading",
+        "rce_process_exec"
+      ],
+      "notes": "Root detection runtime; static sees exec-style checks from 0087",
+      "source_from": [
+        "MASTG-DEMO-0087"
+      ]
+    },
+    "MASTG-DEMO-0089": {
+      "expect_any": [
+        "biometric_without_crypto",
+        "keystore_no_user_auth"
+      ],
+      "notes": "BiometricPrompt with device credential fallback"
+    },
+    "MASTG-DEMO-0090": {
+      "expect_any": [
+        "biometric_without_crypto"
+      ],
+      "notes": "BiometricPrompt event-bound auth"
+    },
+    "MASTG-DEMO-0091": {
+      "expect_any": [
+        "biometric_without_crypto",
+        "keystore_no_user_auth"
+      ],
+      "notes": "Shares DEMO-0090 sources (setInvalidatedByBiometricEnrollment)",
+      "source_from": [
+        "MASTG-DEMO-0090"
+      ]
+    },
+    "MASTG-DEMO-0092": {
+      "expect_any": [
+        "biometric_without_crypto"
+      ],
+      "notes": "Shares DEMO-0090 sources",
+      "source_from": [
+        "MASTG-DEMO-0090"
+      ]
+    },
+    "MASTG-DEMO-0093": {
+      "expect_any": [
+        "biometric_without_crypto",
+        "keystore_no_user_auth"
+      ],
+      "notes": "Shares DEMO-0090 sources",
+      "source_from": [
+        "MASTG-DEMO-0090"
+      ]
+    },
+    "MASTG-DEMO-0097": {
+      "expect_any": [
+        "webview_javascript_interface"
+      ],
+      "notes": "WebView addJavascriptInterface bridge exposure"
+    },
+    "MASTG-DEMO-0100": {
+      "expect_any": [
+        "unsafe_deserialization"
+      ],
+      "notes": "Java Serializable deserialization"
+    },
+    "MASTG-DEMO-0101": {
+      "expect_any": [
+        "storage_integrity_hmac",
+        "hardcoded_crypto_secret"
+      ],
+      "notes": "HMAC prefs integrity with hardcoded Mac key"
+    },
+    "MASTG-DEMO-0102": {
+      "expect_any": [
+        "provider_sql_injection",
+        "sql_injection",
+        "room_sql_injection"
+      ],
+      "notes": "SQL injection via ContentProvider"
+    },
+    "MASTG-DEMO-0103": {
+      "expect_any": [
+        "overlay_protection_api"
+      ],
+      "notes": "setFilterTouchesWhenObscured inventory (mixed protected/unprotected views)"
+    },
+    "MASTG-DEMO-0104": {
+      "expect_any": [
+        "system_alert_window"
+      ],
+      "notes": "SYSTEM_ALERT_WINDOW permission"
+    },
+    "MASTG-DEMO-0105": {
+      "expect_any": [
+        "overlay_protection_api"
+      ],
+      "notes": "setHideOverlayWindows activity-level protection"
+    },
+    "MASTG-DEMO-0106": {
+      "expect_any": [
+        "hardcoded_crypto_secret"
+      ],
+      "notes": "Frida hooks Cipher.doFinal; static sees hardcoded API key + Cipher"
+    },
+    "MASTG-DEMO-0107": {
+      "expect_any": [
+        "anti_frida_maps",
+        "hardcoded_crypto_secret"
+      ],
+      "notes": "Anti-Frida /proc/self/maps + frida/gadget checks"
+    },
+    "MASTG-DEMO-0108": {
+      "expect_any": [
+        "anti_frida_maps",
+        "hardcoded_crypto_secret"
+      ],
+      "notes": "Bypass demo; static still sees anti-Frida maps from 0107 sources",
+      "source_from": [
+        "MASTG-DEMO-0107"
+      ]
+    },
+    "MASTG-DEMO-0114": {
+      "expect_any": [
+        "emulator_detection"
+      ],
+      "notes": "Frida traces emulator checks; Build.* + emulator markers static"
+    },
+    "MASTG-DEMO-0115": {
+      "expect_any": [
+        "debugger_check"
+      ],
+      "notes": "Debug.isDebuggerConnected JDWP check"
+    },
+    "MASTG-DEMO-0116": {
+      "expect_any": [
+        "tracerpid_check"
+      ],
+      "notes": "TracerPid /proc/self/status anti-debug"
+    },
+    "MASTG-DEMO-0120": {
+      "expect_any": [
+        "provider_sql_injection",
+        "sql_injection",
+        "sqlcipher_hardcoded_passphrase"
+      ],
+      "notes": "Shares DEMO-0121 sources",
+      "source_from": [
+        "MASTG-DEMO-0121"
+      ]
+    },
+    "MASTG-DEMO-0121": {
+      "expect_any": [
+        "provider_sql_injection",
+        "sql_injection",
+        "icc_extra_flow",
+        "sqlcipher_hardcoded_passphrase"
+      ],
+      "notes": "Exported provider / SQLCipher passphrase patterns"
+    },
+    "MASTG-DEMO-0122": {
+      "expect_any": [
+        "path_traversal",
+        "provider_path_traversal",
+        "uri_permission_grant_flow"
+      ],
+      "notes": "FileProvider unrestricted paths"
+    },
+    "MASTG-DEMO-0123": {
+      "expect_any": [
+        "uri_permission_grant_flow",
+        "path_traversal",
+        "provider_path_traversal",
+        "implicit_intent_sensitive",
+        "implicit_intent_launch"
+      ],
+      "notes": "FileProvider URI grant oversharing (often surfaces as sensitive implicit Intent)"
+    },
+    "MASTG-DEMO-0128": {
+      "expect_any": [
+        "implicit_intent_launch",
+        "implicit_intent_sensitive",
+        "intent_spoofing",
+        "icc_extra_flow"
+      ],
+      "notes": "Sensitive data via unprotected activity"
+    },
+    "MASTG-DEMO-0129": {
+      "expect_any": [
+        "implicit_intent_launch",
+        "implicit_intent_sensitive",
+        "command_receiver",
+        "icc_extra_flow"
+      ],
+      "notes": "Sensitive action via unprotected service"
+    },
+    "MASTG-DEMO-0130": {
+      "expect_any": [
+        "sensitive_broadcast",
+        "credential_broadcast",
+        "command_receiver",
+        "sticky_ordered_broadcast",
+        "implicit_intent_sensitive",
+        "logging_pii"
+      ],
+      "notes": "Unprotected manifest broadcast receiver"
+    },
+    "MASTG-DEMO-0132": {
+      "expect_any": [
+        "root_detection"
+      ],
+      "notes": "Root manager package name checks (magisk/supersu)"
+    },
+    "MASTG-DEMO-0133": {
+      "expect_any": [
+        "native_root_detection",
+        "root_detection"
+      ],
+      "notes": "Native librootcheck.so embeds su path strings"
+    },
+    "MASTG-DEMO-0136": {
+      "expect_any": [
+        "implicit_intent_launch",
+        "implicit_intent_sensitive",
+        "intent_spoofing"
+      ],
+      "notes": "Internal activity via implicit Intent"
+    },
+    "MASTG-DEMO-0138": {
+      "expect_any": [
+        "implicit_intent_launch",
+        "implicit_intent_sensitive",
+        "icc_extra_flow"
+      ],
+      "notes": "Shares DEMO-0136 sources (implicit intent leak)",
+      "source_from": [
+        "MASTG-DEMO-0136"
+      ]
+    },
+    "MASTG-DEMO-0139": {
+      "expect_any": [
+        "path_traversal",
+        "provider_path_traversal",
+        "implicit_intent_launch",
+        "implicit_intent_sensitive"
+      ],
+      "notes": "Path traversal + Frida hooks; intent surface static"
+    },
+    "MASTG-DEMO-0140": {
+      "expect_any": [
+        "exported_custom_action"
+      ],
+      "notes": "Attacker activity exported for INTERNAL_ACTION"
+    },
+    "MASTG-DEMO-0141": {
+      "expect_any": [
+        "uri_permission_setresult_passthrough"
+      ],
+      "notes": "AttackerActivity setResult(getIntent()) URI grant passthrough for path-traversal provider"
+    },
+    "MASTG-DEMO-0147": {
+      "expect_any": [
+        "pending_intent"
+      ],
+      "notes": "Mutable / implicit PendingIntent"
+    },
+    "MASTG-DEMO-0151": {
+      "expect_any": [
+        "deeplink_query_unvalidated",
+        "implicit_intent_launch"
+      ],
+      "notes": "App link without autoVerify; deep-link query/intent surface"
+    },
+    "MASTG-DEMO-0152": {
+      "expect_any": [
+        "deeplink_query_unvalidated",
+        "implicit_intent_launch"
+      ],
+      "notes": "Custom scheme handler uses getQueryParameter without validation"
+    },
+    "MASTG-DEMO-0156": {
+      "expect_any": [
+        "safebrowsing_disabled"
+      ],
+      "notes": "WebSettings.setSafeBrowsingEnabled(false)"
+    },
+    "MASTG-DEMO-0157": {
+      "expect_any": [
+        "webview_url_override",
+        "webview_unsafe",
+        "webview_unsafe_url",
+        "webview_weak_host_check"
+      ],
+      "notes": "WebViewClient URL loading handlers without host validation"
+    },
+    "MASTG-DEMO-0158": {
+      "expect_any": [
+        "webview_url_override",
+        "webview_unsafe",
+        "webview_unsafe_url",
+        "webview_weak_host_check"
+      ],
+      "notes": "Frida WebViewClient handlers; sources from 0157",
+      "source_from": [
+        "MASTG-DEMO-0157"
+      ]
+    }
+  }
+}

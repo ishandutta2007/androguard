@@ -171,6 +171,27 @@ class CliSummaryTest(unittest.TestCase):
         self.assertIn("scan-vulns:", out)
         self.assertIn("finding", out)
 
+    @unittest.skipUnless(HAS_DECOMPILER, "dex-decompiler not installed")
+    def test_scan_vulns_shows_mastg_when_present(self):
+        """CLI prints MASWE/MASVS/MASTG enrichment when the scanner attaches it."""
+        from androguard import Application
+
+        findings = Application(str(TEST_APK)).scan_vulns()
+        enriched = [
+            f
+            for f in findings
+            if f.get("maswe") or f.get("masvs") or f.get("mastg_know") or f.get("mastg_best")
+        ]
+        if not enriched:
+            self.skipTest("fixture APK has no MAS-enriched findings")
+        code, out = self._run("--scan-vulns")
+        self.assertEqual(code, 0)
+        self.assertTrue(
+            any(tag in out for tag in ("MASWE", "MASVS", "MASTG-KNOW", "KNOW", "BEST")),
+            msg=out[:2000],
+        )
+        self.assertNotIn("https://mas.owasp.org", out)
+
 
 class CliUsageTest(unittest.TestCase):
     def test_missing_input_exits(self):

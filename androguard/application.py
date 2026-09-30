@@ -303,11 +303,240 @@ class Application:
         )
 
     def scan_vulns(self) -> list:
-        """Run vulnerability detectors across all DEX files."""
+        """Run vulnerability detectors across all DEX files (+ light manifest/native checks)."""
         findings: list = []
         for _name, raw in self._dex_blobs():
             findings.extend(decompiler_scan_vulns(raw))
-        return findings
+        findings.extend(self._scan_manifest_vulns())
+        findings.extend(self._scan_native_vulns())
+        return [self._enrich_finding_mas(f) for f in findings]
+
+    def _enrich_finding_mas(self, finding: dict) -> dict:
+        """Attach MASWE/MASVS/MASTG links when the decompiler binding omitted them."""
+        if finding.get("maswe") or finding.get("masvs") or finding.get("mastg_know"):
+            return finding
+        try:
+            from androguard.core.decompiler import ensure_loaded
+
+            mod = ensure_loaded()
+            enrich = getattr(mod, "enrich_mas", None)
+            if enrich is None:
+                return finding
+            mas = enrich(
+                str(finding.get("category") or ""),
+                str(finding.get("title") or ""),
+                str(finding.get("message") or ""),
+                str(finding.get("recommendation") or ""),
+                finding.get("cwe"),
+            )
+            if isinstance(mas, dict):
+                for key in ("maswe", "masvs", "mastg_know", "mastg_best"):
+                    if mas.get(key):
+                        finding[key] = mas[key]
+        except Exception:
+            pass
+        return finding
+
+    def _scan_native_vulns(self) -> list[dict]:
+        """Scan embedded .so files for common root/su path strings."""
+        out: list[dict] = []
+        markers = (
+            b"/system/bin/su",
+            b"/system/xbin/su",
+            b"/sbin/su",
+            b"/su/bin/su",
+        )
+        try:
+            files = self._apk.get_files()
+        except Exception:
+            return out
+        for name in files:
+            if not str(name).endswith(".so"):
+                continue
+            try:
+                raw = self._apk.get_file(name)
+            except Exception:
+                continue
+            if not raw:
+                continue
+            hits = [m.decode("ascii") for m in markers if m in raw]
+            if hits:
+                out.append(
+                    {
+                        "category": "native_root_detection",
+                        "title": "Native root artifact strings",
+                        "severity": "info",
+                        "message": f"{name} embeds {', '.join(hits)}",
+                        "class_name": name,
+                        "method_name": "",
+                        "sink_desc": "native_root_detection",
+                    }
+                )
+        return out
+
+    def _scan_manifest_vulns(self) -> list[dict]:
+        """Manifest / permission findings not visible from DEX alone."""
+        out: list[dict] = []
+        axml = getattr(self._apk, "axml", None)
+        if axml is None:
+            return out
+
+        def _finding(category: str, title: str, message: str, severity: str = "medium") -> dict:
+            return {
+                "category": category,
+                "title": title,
+                "severity": severity,
+                "message": message,
+                "class_name": "AndroidManifest.xml",
+                "method_name": "",
+                "sink_desc": category,
+            }
+
+        try:
+            debuggable = axml.get_attribute_value("application", "debuggable")
+        except Exception:
+            debuggable = None
+        if str(debuggable).lower() in {"true", "1"}:
+            out.append(
+                _finding(
+                    "manifest_debuggable",
+                    "Application debuggable",
+                    "android:debuggable=true in the manifest",
+                    "high",
+                )
+            )
+
+        try:
+            allow_backup = axml.get_attribute_value("application", "allowBackup")
+        except Exception:
+            allow_backup = None
+        try:
+            fbc = axml.get_attribute_value("application", "fullBackupContent")
+        except Exception:
+            fbc = None
+        if str(allow_backup).lower() in {"true", "1"} or (
+            fbc and str(allow_backup).lower() not in {"false", "0"}
+        ):
+            out.append(
+                _finding(
+                    "allow_backup",
+                    "Application allowBackup enabled",
+                    f"android:allowBackup={allow_backup!s} fullBackupContent={fbc!s}",
+                    "medium",
+                )
+            )
+
+        dangerous = {
+            "android.permission.READ_CONTACTS",
+            "android.permission.WRITE_CONTACTS",
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "android.permission.MANAGE_EXTERNAL_STORAGE",
+            "android.permission.ACCESS_FINE_LOCATION",
+            "android.permission.ACCESS_COARSE_LOCATION",
+            "android.permission.READ_SMS",
+            "android.permission.RECEIVE_SMS",
+            "android.permission.CAMERA",
+            "android.permission.RECORD_AUDIO",
+            "android.permission.READ_PHONE_STATE",
+            "android.permission.CALL_PHONE",
+        }
+        uses = []
+        try:
+            uses = list(getattr(axml, "uses_permissions", None) or [])
+        except Exception:
+            uses = []
+        for entry in uses:
+            name = entry[0] if isinstance(entry, (list, tuple)) and entry else str(entry)
+            if name in dangerous:
+                out.append(
+                    _finding(
+                        "dangerous_permission",
+                        "Dangerous permission declared",
+                        f"Manifest declares {name}",
+                        "info",
+                    )
+                )
+            if name == "android.permission.SYSTEM_ALERT_WINDOW":
+                out.append(
+                    _finding(
+                        "system_alert_window",
+                        "SYSTEM_ALERT_WINDOW permission",
+                        "App requests SYSTEM_ALERT_WINDOW (draw overlays)",
+                        "medium",
+                    )
+                )
+
+        # Exported activities with custom actions (attacker-app pattern).
+        std_actions = {
+            "android.intent.action.MAIN",
+            "android.intent.action.VIEW",
+            "android.intent.action.SEND",
+            "android.intent.action.SENDTO",
+            "android.intent.action.DIAL",
+            "android.intent.action.CALL",
+            "android.intent.action.WEB_SEARCH",
+            "android.intent.action.PICK",
+            "android.intent.action.EDIT",
+            "android.intent.action.INSERT",
+            "android.intent.action.DELETE",
+            "android.intent.action.SEARCH",
+        }
+        try:
+            activities = list(self._apk.get_activities() or [])
+        except Exception:
+            activities = []
+        for act in activities:
+            try:
+                filters = self._apk.get_intent_filters("activity", act) or {}
+            except Exception:
+                filters = {}
+            actions = filters.get("action") or []
+            custom = [a for a in actions if a and a not in std_actions]
+            if custom:
+                out.append(
+                    _finding(
+                        "exported_custom_action",
+                        "Exported component with custom intent action",
+                        f"{act} handles {', '.join(custom)}",
+                        "medium",
+                    )
+                )
+
+        # networkSecurityConfig + user CA trust (best-effort over decoded XML / raw zip)
+        try:
+            nsc_attr = axml.get_attribute_value("application", "networkSecurityConfig")
+        except Exception:
+            nsc_attr = None
+        if nsc_attr:
+            blob = ""
+            try:
+                for name in self._apk.get_files():
+                    if "network_security_config" in name.replace("\\", "/"):
+                        raw = self._apk.get_file(name)
+                        if raw:
+                            blob = raw.decode("utf-8", errors="ignore").lower()
+                            break
+            except Exception:
+                blob = ""
+            if not blob:
+                try:
+                    xml = axml.get_xml() or ""
+                    blob = xml.decode("utf-8", errors="ignore").lower() if isinstance(xml, (bytes, bytearray)) else str(xml).lower()
+                except Exception:
+                    blob = ""
+            if "trust-anchors" in blob and (
+                "user" in blob or "src=\"user\"" in blob or "src='user'" in blob
+            ):
+                out.append(
+                    _finding(
+                        "network_security_config_user_ca",
+                        "Network security config trusts user CAs",
+                        "networkSecurityConfig appears to trust user-added CAs",
+                        "high",
+                    )
+                )
+        return out
 
     def decode_project(self, **kwargs):
         """Decode this APK to an in-memory apk-patch project (requires ``androguard[patch]``)."""

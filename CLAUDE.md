@@ -80,12 +80,30 @@ Examples: `python -m examples.application_summary`, `examples.decompile`, `examp
 
 ```
 workspace/
-├── samples/     # input APKs
-├── output/      # decompiled Java (per package)
-└── reports/     # markdown analysis reports
+├── samples/            # input APKs
+├── output/             # decompiled Java (per package)
+├── reports/            # markdown analysis / MASTG validation reports
+└── mastg-validation/   # cloned mastg + mas-app-android + built demos (gitignored)
 ```
 
 Write reports to `workspace/reports/<package>-<YYYY-MM-DD>.md`.
+
+### MASTG demo ↔ scan_vulns
+
+```bash
+python scripts/mastg_validate.py --setup            # clone mastg + mas-app-android
+python scripts/mastg_validate.py --sync-expected   # ensure all demo ids in expected.json
+python scripts/mastg_validate.py                   # ALL demos → JSON + refreshes coverage doc
+python scripts/mastg_validate.py --mapped-only     # curated expect_any / forbid only
+python scripts/mastg_coverage_doc.py               # regenerate coverage doc from latest JSON
+```
+
+Expectations live in `scripts/mastg_expected.json` (one entry per demo). Gaps (empty `expect_any`)
+are reported as `gap`, not `fail`. Sibling/Frida demos (e.g. MASTG-DEMO-0158 → 0157 sources) are built
+via markdown `{{ ../MASTG-DEMO-… }}` includes.
+
+**Coverage reference (single doc):** [`workspace/reports/mastg-coverage.md`](workspace/reports/mastg-coverage.md)
+— Frida static hit/partial/miss included; dated markdown reports are not kept.
 
 ## Tests
 

@@ -6,11 +6,115 @@ import argparse
 import io
 import sys
 
+from rich.console import Console
+from rich.text import Text
+
 from androguard import __version__ as ANDROGUARD_VERSION
 from androguard.application import Application
 from androguard.core.bytecode import BytecodeNotAvailable
 from androguard.core.decompiler import DecompilerNotAvailable, parse_method_selector
 from androguard.helper.logging import LOGGER
+
+_SEVERITY_STYLE = {
+    "critical": "bold white on dark_red",
+    "high": "bold white on red",
+    "medium": "bold black on yellow",
+    "low": "bold white on blue",
+    "info": "bold white on cyan",
+}
+
+
+def _mas_ids(links) -> list[str]:
+    ids: list[str] = []
+    for link in links or []:
+        if isinstance(link, dict):
+            lid = (link.get("id") or "").strip()
+            if lid:
+                ids.append(lid)
+        elif link:
+            ids.append(str(link))
+    # preserve order, drop dupes
+    seen: set[str] = set()
+    out: list[str] = []
+    for i in ids:
+        if i not in seen:
+            seen.add(i)
+            out.append(i)
+    return out
+
+
+def _print_vuln_finding(console: Console, index: int, f: dict) -> None:
+    """Print one scan_vulns finding with colored severity and compact MAS ids (no URLs)."""
+    severity = str(f.get("severity") or "?").lower()
+    style = _SEVERITY_STYLE.get(severity, "bold white on grey37")
+    category = str(f.get("category") or "")
+    title = str(f.get("title") or "")
+    cls = str(f.get("class_name") or "")
+    meth = str(f.get("method_name") or "")
+    loc = f"{cls}#{meth}" if meth else cls
+
+    head = Text()
+    head.append(f"{index}. ", style="bold dim")
+    head.append(f" {severity.upper()} ", style=style)
+    head.append(" ")
+    head.append(category, style="bold cyan")
+    if title:
+        head.append(" — ", style="dim")
+        head.append(title, style="bold")
+    console.print(head)
+
+    if loc:
+        console.print(Text.assemble(("   at     ", "dim"), (loc, "white")))
+    if f.get("cwe"):
+        console.print(Text.assemble(("   CWE    ", "dim"), (str(f["cwe"]), "magenta")))
+
+    msg = str(f.get("message") or "").strip()
+    if msg and msg != title:
+        # Prefer a short first sentence; full dump is noisy in CLI
+        short = msg.split(". Sink:")[0].split(". Source:")[0].strip()
+        if short and not short.endswith("."):
+            short += "."
+        console.print(Text.assemble(("   note   ", "dim"), (short, "white")))
+
+    mas_rows = (
+        ("MASWE  ", "maswe", "red"),
+        ("MASVS  ", "masvs", "yellow"),
+        ("MASTG  ", "mastg_know", "green"),
+        ("BEST   ", "mastg_best", "green"),
+    )
+    # Merge KNOW under MASTG label; BEST separate
+    for label, key, color in mas_rows:
+        ids = _mas_ids(f.get(key))
+        if not ids:
+            continue
+        # Relabel KNOW for clarity
+        shown = "KNOW   " if key == "mastg_know" else label
+        console.print(
+            Text.assemble(
+                (f"   {shown}", "dim"),
+                (", ".join(ids), color),
+            )
+        )
+
+    rec = str(f.get("recommendation") or "").strip()
+    if rec:
+        console.print(Text.assemble(("   fix    ", "dim"), (rec, "italic bright_white")))
+    console.print()
+
+
+def _print_scan_vulns(findings: list) -> None:
+    console = Console(file=sys.stdout, highlight=False, soft_wrap=True)
+    console.print(
+        Text.assemble(
+            ("scan-vulns: ", "bold"),
+            (f"{len(findings)} finding(s)", "bold cyan"),
+        )
+    )
+    if not findings:
+        return
+    console.print()
+    for i, f in enumerate(findings, 1):
+        _print_vuln_finding(console, i, f if isinstance(f, dict) else dict(f))
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -334,12 +438,7 @@ def app(argv: list[str] | None = None) -> int:
         except DecompilerNotAvailable as exc:
             LOGGER.error("%s", exc)
             return 1
-        print(f"scan-vulns: {len(findings)} finding(s)")
-        for f in findings:
-            print(
-                f"[{f.get('severity', '?')}] {f.get('category')}: "
-                f"{f.get('class_name')}#{f.get('method_name')} — {f.get('title')}"
-            )
+        _print_scan_vulns(findings)
         return 0
 
     if getattr(args, "getclass", None):
