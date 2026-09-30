@@ -161,6 +161,43 @@ androguard -i my.apk --emulate 'tests.androguard.TestActivity#onCreate'
 androguard -i my.apk --decode-project
 ```
 
+### CLI smoke test (bundled sample)
+
+After `pip install -e '.[full]'`, exercise the main CLI features against the repo
+sample APK (`tests/data/APK/TestActivity.apk`):
+
+```bash
+# from the androguard repo root
+APK=tests/data/APK/TestActivity.apk
+CLS=tests.androguard.TestActivity
+METH="$CLS#onCreate"
+
+androguard -i "$APK"                                    # summary
+androguard -i "$APK" --list-classes | head
+androguard -i "$APK" --list-methods | head
+
+# disasm (androguard[disasm])
+androguard -i "$APK" --disasm --class TestActivity --method onCreate
+androguard -i "$APK" --disasm --class TestActivity --method onCreate --cfg
+
+# decompile / ASC / vulns / emulate (androguard[decompile])
+androguard -i "$APK" --decompile-method "$METH"
+androguard -i "$APK" --getclass "$CLS"
+androguard -i "$APK" -d /tmp/androguard-decompiled/ --only-package tests.androguard
+androguard -i "$APK" --findrefs string --findrefs-value "this is a test"
+androguard -i "$APK" --scan-vulns                       # MASWE / MASVS / MASTG ids
+androguard -i "$APK" --emulate "$METH"
+
+# patch (androguard[patch])
+androguard -i "$APK" --decode-project
+```
+
+Or run the Python demos (same coverage, including optional ARM):
+
+```bash
+python -m examples.run_all
+```
+
 ### High-level API (`Application`)
 
 ```python
